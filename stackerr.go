@@ -15,17 +15,17 @@ const (
 
 // Error represents an error and is consisted of a simple string message and the stack of the goroutine
 // at the moment the error was constructed.
-type Error struct {
+type Err struct {
 	Message string
 	Stack   []byte
 }
 
-// New will create a new Error object with the given message and the current goroutine stack.
+// New will create a new Err object with the given message and the current goroutine stack.
 // This replaces the standard errors.New function.
-func New(msg string) *Error {
+func New(msg string) *Err {
 	var buf [BufferSize]byte
 
-	return &Error{
+	return &Err{
 		Message: msg,
 		Stack:   buf[:runtime.Stack(buf[:], false)],
 	}
@@ -34,12 +34,12 @@ func New(msg string) *Error {
 // Wrap allows you to wrap an existing standard error object. It's important to know that the stack
 // will be from the moment this function is called rather than when the error was first created, but
 // it allows to a certain level of traceability.
-func Wrap(err error) *Error {
+func Wrap(err error) *Err {
 	if err == nil {
 		return nil
 	}
 
-	if e, ok := err.(*Error); ok {
+	if e, ok := err.(*Err); ok {
 		return e
 	}
 
@@ -48,15 +48,15 @@ func Wrap(err error) *Error {
 
 // Error returns the error's message and exists so that this package's errors can be used as regular
 // standard error instances.
-func (e Error) Error() string {
+func (e Err) Error() string {
 	return e.Message
 }
 
 // NewStack creates a copy of the error with the Stack updated to the current goroutine stack.
-func (e Error) NewStack() *Error {
+func (e Err) NewStack() *Err {
 	var buf [BufferSize]byte
 
-	return &Error{
+	return &Err{
 		Message: e.Message,
 		Stack:   buf[:runtime.Stack(buf[:], false)],
 	}
