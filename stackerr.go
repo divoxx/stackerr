@@ -9,6 +9,10 @@ import (
 	"runtime"
 )
 
+const (
+	BufferSize = 2048
+)
+
 // Error represents an error and is consisted of a simple string message and the stack of the goroutine
 // at the moment the error was constructed.
 type Error struct {
@@ -16,16 +20,10 @@ type Error struct {
 	Stack   []byte
 }
 
-// Error returns the error's message and exists so that this package's errors can be used as regular
-// standard error instances.
-func (e Error) Error() string {
-	return e.Message
-}
-
 // New will create a new Error object with the given message and the current goroutine stack.
 // This replaces the standard errors.New function.
 func New(msg string) *Error {
-	var buf [4096]byte
+	var buf [BufferSize]byte
 
 	return &Error{
 		Message: msg,
@@ -46,4 +44,20 @@ func Wrap(err error) *Error {
 	}
 
 	return New(err.Error())
+}
+
+// Error returns the error's message and exists so that this package's errors can be used as regular
+// standard error instances.
+func (e Error) Error() string {
+	return e.Message
+}
+
+// NewStack creates a copy of the error with the Stack updated to the current goroutine stack.
+func (e Error) NewStack() *Error {
+	var buf [BufferSize]byte
+
+	return &Error{
+		Message: e.Message,
+		Stack:   buf[:runtime.Stack(buf[:], false)],
+	}
 }
