@@ -10,11 +10,11 @@ import (
 func TestErrorWithStack(t *testing.T) {
 	err := New("a beautiful error message")
 
-	if err.Message != "a beautiful error message" {
-		t.Error("unexpected error message:", err.Message)
+	if err.Error() != "a beautiful error message" {
+		t.Error("unexpected error message:", err.Error())
 	}
 
-	if !strings.Contains(string(err.Stack), "github.com/divoxx/stackerr.TestErrorWithStack") {
+	if !strings.Contains(string(Stack(err)), "github.com/divoxx/stackerr.TestErrorWithStack") {
 		t.Errorf("unexpected error stack to be correct")
 	}
 }
@@ -34,11 +34,11 @@ func TestStdErrorCompatibility(t *testing.T) {
 func TestWrapStdError(t *testing.T) {
 	err := Wrap(errors.New("standard error message"))
 
-	if err.Message != "standard error message" {
+	if err.Error() != "standard error message" {
 		t.Error("expected wrapped standard error to keep same message")
 	}
 
-	if !strings.Contains(string(err.Stack), "github.com/divoxx/stackerr.TestWrapStdError") {
+	if !strings.Contains(string(Stack(err)), "github.com/divoxx/stackerr.TestWrapStdError") {
 		t.Errorf("unexpected wrapped error stack to be correct")
 	}
 }
@@ -49,13 +49,19 @@ func TestWrapNilError(t *testing.T) {
 	if err != nil {
 		t.Error("expected wrapped nil error to be nil")
 	}
+
+	err = Wrap(error(nil))
+
+	if err != nil {
+		t.Error("expected wrapped nil error to be nil")
+	}
 }
 
 func TestWrapStackerr(t *testing.T) {
 	err := New("an error")
 	werr := Wrap(err)
 
-	if !bytes.Equal(err.Stack, werr.Stack) {
+	if !bytes.Equal(Stack(err), Stack(werr)) {
 		t.Error("expected re-wrapping an stackerr to not chang stack")
 	}
 }
