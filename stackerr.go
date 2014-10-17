@@ -52,11 +52,11 @@ func Wrap(err error) error {
 	}
 }
 
-func Stack(err error) []byte {
+func Stack(err error) string {
 	if e, ok := err.(*Err); ok {
-		return e.Stack
+		return string(e.Stack)
 	} else {
-		return nil
+		return ""
 	}
 }
 
